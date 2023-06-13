@@ -9,16 +9,17 @@ use rocket::response::Responder;
 use serde_json::{Result, Value};
 #[macro_use]
 extern crate rocket;
-use rocket::response::content;
+use rocket::http::ContentType;
+use rocket::response::content::RawHtml;
 
-#[get("/run")]
-fn index() -> content::RawJson<&'static str> {
-    content::RawJson("{ 'hi': 'world' }")
+#[get("/")]
+fn index() -> RawHtml<&'static str> {
+    RawHtml(include_str!("temp.html"))
 }
 
 #[launch]
 fn rocket() -> _ {
-    rocket::build().mount("/api", routes![index])
+    rocket::build().mount("/", routes![index])
 }
 
 fn run_file(source: String) {
