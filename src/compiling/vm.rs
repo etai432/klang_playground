@@ -294,7 +294,7 @@ impl<'a> VM<'a> {
                 }) => string,
                 Some(Value::Number(x)) => x.to_string(),
                 Some(Value::Bool(x)) => x.to_string(),
-                Some(Value::Vec(x)) => format!("{:?}", x),
+                Some(Value::Vec(x)) => format!("{}", Value::Vec(x)),
                 Some(Value::None) => "None".to_string(),
                 None => {
                     self.error("Stack overflow (cant pop an empty stack)");
@@ -303,7 +303,7 @@ impl<'a> VM<'a> {
             };
             print = self.replace_last_braces(print.as_str(), repl.as_str());
         }
-        print
+        print + "\n"
     }
     fn count_braces(&self, string: &str) -> usize {
         let mut count = 0;
