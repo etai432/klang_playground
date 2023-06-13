@@ -4,13 +4,14 @@ use compiling::{compiler, vm};
 mod error;
 mod interpreter;
 use interpreter::{parser, scanner};
+use rocket::response::content::RawHtml;
 
 #[macro_use]
 extern crate rocket;
 
 #[get("/")]
-fn index() -> &'static str {
-    "Hello, world!"
+fn index() -> RawHtml<&'static str> {
+    RawHtml(include_str!(r"..\frontend\index.html"))
 }
 
 #[launch]
