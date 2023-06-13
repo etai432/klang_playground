@@ -27,14 +27,15 @@ impl<'a> VM<'a> {
         }
     }
     pub fn run(&mut self) -> String {
-        let output = String::new();{
+        let mut output = String::new();
         //executes the code on the chunk
         while self.index < self.chunk.code.len() as i32 {
-            output += self.once();
+            output += self.once().as_str();
             self.index += 1;
         }
+        output
     }
-    pub fn once(&mut self) -> &str {
+    pub fn once(&mut self) -> String {
         // println!("{:?}", self.global);
         match self.chunk.code[self.index as usize].clone() {
             OpCode::Constant(x) => self.push(x),
@@ -141,7 +142,7 @@ impl<'a> VM<'a> {
             OpCode::Iterable(x) => self.iterable(x),
             OpCode::Eof => {}
         }
-        ""
+        String::new()
     }
     fn iterable(&mut self, x: i32) {
         let mut vec: Vec<Value> = Vec::with_capacity(x as usize);
@@ -275,7 +276,7 @@ impl<'a> VM<'a> {
         }
         scope.stack.push(Value::Vec(vector));
     }
-    fn print(&mut self) -> &str {
+    fn print(&mut self) -> String {
         let mut print = match self.pop() {
             Some(Value::String {
                 string,
@@ -302,7 +303,7 @@ impl<'a> VM<'a> {
             };
             print = self.replace_last_braces(print.as_str(), repl.as_str());
         }
-        print.as_str()
+        print
     }
     fn count_braces(&self, string: &str) -> usize {
         let mut count = 0;

@@ -1,11 +1,12 @@
 use error::KlangError;
-use std::path::Path;
-use std::{env, fs};
 mod compiling;
 use compiling::{compiler, vm};
 mod error;
 mod interpreter;
 use interpreter::{parser, scanner};
+
+#[macro_use]
+extern crate rocket;
 
 #[get("/")]
 fn index() -> &'static str {
@@ -13,12 +14,12 @@ fn index() -> &'static str {
 }
 
 #[launch]
-fn rocket() ->  {
+fn rocket() -> _ {
     rocket::build().mount("/", routes![index])
 }
 
 fn run_file(source: String) {
-    let relfilename = "playground.klang"
+    let relfilename = "playground.klang";
     let mut scanner = scanner::Scanner::new(&source, relfilename);
     let mut parser = parser::Parser::new(scanner.scan_tokens(), relfilename);
     let ast = parser.parse();
