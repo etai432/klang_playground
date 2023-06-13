@@ -1,22 +1,22 @@
+#![allow(unused)]
 use error::KlangError;
 mod compiling;
 use compiling::{compiler, vm};
 mod error;
 mod interpreter;
 use interpreter::{parser, scanner};
-use rocket::response::content::RawHtml;
-
+use serde_json::{Result, Value};
 #[macro_use]
 extern crate rocket;
 
-#[get("/")]
-fn index() -> RawHtml<&'static str> {
-    RawHtml(include_str!(r"..\frontend\index.html"))
+#[get("/run")]
+fn index() -> Value {
+    Json("hello")
 }
 
 #[launch]
 fn rocket() -> _ {
-    rocket::build().mount("/", routes![index])
+    rocket::build().mount("/api", routes![index])
 }
 
 fn run_file(source: String) {
