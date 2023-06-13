@@ -5,13 +5,15 @@ use compiling::{compiler, vm};
 mod error;
 mod interpreter;
 use interpreter::{parser, scanner};
+use rocket::response::Responder;
 use serde_json::{Result, Value};
 #[macro_use]
 extern crate rocket;
+use rocket::response::content;
 
 #[get("/run")]
-fn index() -> Value {
-    Json("hello")
+fn index() -> content::RawJson<&'static str> {
+    content::RawJson("{ 'hi': 'world' }")
 }
 
 #[launch]
