@@ -22,22 +22,7 @@ pub fn create_natives() -> Vec<NativeFn> {
     natives.extend(math_natives());
     natives.extend(random_natives());
     natives.extend(time_natives());
-    natives.extend(create_file_io_natives());
     natives.extend(vector_natives());
-    natives.push(NativeFn {
-        name: "read".to_string(),
-        args: 0,
-        function: Box::new(|_| {
-            let mut input = String::new();
-            io::stdin()
-                .read_line(&mut input)
-                .expect("Failed to read line");
-            Some(Value::String {
-                string: input.trim().to_string(),
-                printables: Vec::new(),
-            })
-        }),
-    });
     natives
 }
 fn math_natives() -> Vec<NativeFn> {
@@ -260,62 +245,6 @@ pub fn time_natives() -> Vec<NativeFn> {
     });
     natives
 }
-pub fn create_file_io_natives() -> Vec<NativeFn> {
-    let mut natives: Vec<NativeFn> = Vec::new();
-
-    natives.push(NativeFn {
-        name: "readFile".to_string(),
-        args: 1,
-        function: Box::new(|args| {
-            if let Some(Value::String {
-                string: filename, ..
-            }) = args.get(0)
-            {
-                match read_file(filename) {
-                    Ok(contents) => Some(Value::String {
-                        string: contents,
-                        printables: Vec::new(),
-                    }),
-                    Err(err) => {
-                        error(format!("Failed to read file: {}", err).as_str());
-                        panic!()
-                    }
-                }
-            } else {
-                error("Invalid arguments for read_file");
-                panic!()
-            }
-        }),
-    });
-    natives.push(NativeFn {
-        name: "writeFile".to_string(),
-        args: 1,
-        function: Box::new(|args| {
-            if let (
-                Some(Value::String {
-                    string: filename, ..
-                }),
-                Some(Value::String {
-                    string: contents, ..
-                }),
-            ) = (args.get(0), args.get(1))
-            {
-                match write_file(filename, contents) {
-                    Ok(()) => None,
-                    Err(err) => {
-                        error(format!("Failed to write to file: {}", err).as_str());
-                        panic!()
-                    }
-                }
-            } else {
-                error("Invalid arguments for write_file");
-                panic!()
-            }
-        }),
-    });
-
-    natives
-}
 pub fn vector_natives() -> Vec<NativeFn> {
     let mut natives: Vec<NativeFn> = Vec::new();
     natives.push(NativeFn {
@@ -391,21 +320,4 @@ pub fn vector_natives() -> Vec<NativeFn> {
 
 fn error(msg: &str) {
     KlangError::error(KlangError::RuntimeError, msg, 0, "")
-}
-fn read_file(filename: &str) -> io::Result<String> {
-    let path = Path::new(filename);
-    let mut file = File::open(path)?;
-    let mut contents = String::new();
-    file.read_to_string(&mut contents)?;
-    Ok(contents)
-}
-fn write_file(filename: &str, contents: &str) -> io::Result<()> {
-    let path = Path::new(filename);
-    let mut file = OpenOptions::new()
-        .write(true)
-        .create(true)
-        .truncate(true)
-        .open(path)?;
-    file.write_all(contents.as_bytes())?;
-    Ok(())
 }
