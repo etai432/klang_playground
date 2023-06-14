@@ -1,9 +1,6 @@
 use crate::interpreter::scanner::Value;
 use crate::KlangError;
 use rand::Rng;
-use std::fs::{File, OpenOptions};
-use std::io::{self, Read, Write};
-use std::path::Path;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 pub struct NativeFn {
@@ -319,5 +316,5 @@ pub fn vector_natives() -> Vec<NativeFn> {
 }
 
 fn error(msg: &str) {
-    KlangError::error(KlangError::RuntimeError, msg, 0, "")
+    KlangError::error(KlangError::RuntimeError, msg, 0);
 }

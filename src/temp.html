@@ -45,7 +45,7 @@
         </form>
     </div>
     <div id="outputContainer">
-        <h1 id="output"></h1>
+        <h2 id="output"></h2>
     </div>
     <script>
         document.getElementById("inputForm").addEventListener("submit", function (event) {
@@ -58,6 +58,11 @@
                 .then(response => response.text())
                 .then(output => {
                     document.getElementById("output").innerText = output;
+                    if (output.startsWith("[")) {
+                        document.getElementById("output").style.color = "red";
+                    } else {
+                        document.getElementById("output").style.color = "purple";
+                    }
                 });
         });
     </script>

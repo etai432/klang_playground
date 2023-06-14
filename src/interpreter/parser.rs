@@ -6,27 +6,25 @@ use crate::error::KlangError;
 use crate::scanner::Scanner;
 use crate::scanner::{Token, TokenType, Value};
 
-pub struct Parser<'a> {
+pub struct Parser {
     pub tokens: Vec<Token>,
     current: usize,
-    filename: &'a str,
 }
-impl<'a> Parser<'a> {
-    pub fn new(tokens: Vec<Token>, filename: &'a str) -> Parser {
-        Parser {
-            tokens,
-            current: 0,
-            filename,
-        }
+impl Parser {
+    pub fn new(tokens: Vec<Token>) -> Parser {
+        Parser { tokens, current: 0 }
     }
-    pub fn parse(&mut self) -> Vec<Stmt> {
+    pub fn parse(&mut self) -> Result<Vec<Stmt>, String> {
         let mut statements: Vec<Stmt> = Vec::new();
         while !self.is_at_end() {
-            statements.push(self.declaration());
+            statements.push(match self.declaration() {
+                Ok(t) => t,
+                Err(s) => return Err(s),
+            });
         }
-        statements
+        Ok(statements)
     }
-    fn declaration(&mut self) -> Stmt {
+    fn declaration(&mut self) -> Result<Stmt, String> {
         if self.match_tokens(&[TokenType::Let]) {
             self.var_decl()
         } else if self.match_tokens(&[TokenType::Fn]) {
@@ -36,51 +34,77 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn fn_decl(&mut self) -> Stmt {
+    fn fn_decl(&mut self) -> Result<Stmt, String> {
         let return_t = self.previous();
-        let name = self.consume(TokenType::Identifier, "must have a function name");
+        let name = match self.consume(TokenType::Identifier, "must have a function name") {
+            Ok(t) => t,
+            Err(s) => return Err(s),
+        };
         if self.match_tokens(&[TokenType::LeftParen]) {
             if self.match_tokens(&[TokenType::RightParen]) {
-                return Stmt::Fn {
+                return Ok(Stmt::Fn {
                     name,
                     params: Vec::new(),
-                    body: Box::new(self.block()),
-                };
+                    body: Box::new(match self.block() {
+                        Ok(t) => t,
+                        Err(s) => return Err(s),
+                    }),
+                });
             }
             let mut vec: Vec<Token> = Vec::new();
-            let mut iden = self.consume(TokenType::Identifier, "argument must be an identifier");
+            let mut iden =
+                match self.consume(TokenType::Identifier, "argument must be an identifier") {
+                    Ok(t) => t,
+                    Err(s) => return Err(s),
+                };
             vec.push(iden);
             while self.match_tokens(&[TokenType::Comma]) {
-                iden = self.consume(TokenType::Identifier, "parameter must be an identifier");
+                iden = match self.consume(TokenType::Identifier, "parameter must be an identifier")
+                {
+                    Ok(t) => t,
+                    Err(s) => return Err(s),
+                };
                 vec.push(iden);
             }
-            self.consume(TokenType::RightParen, "gotta close the call dude");
-            return Stmt::Fn {
+            match self.consume(TokenType::RightParen, "gotta close the call dude") {
+                Ok(t) => t,
+                Err(s) => return Err(s),
+            };
+            return Ok(Stmt::Fn {
                 name,
                 params: vec,
-                body: Box::new(self.block()),
-            };
+                body: Box::new(match self.block() {
+                    Ok(t) => t,
+                    Err(s) => return Err(s),
+                }),
+            });
         }
         panic!()
     }
-    fn var_decl(&mut self) -> Stmt {
-        let name = self.consume(TokenType::Identifier, "must define a variable name");
+    fn var_decl(&mut self) -> Result<Stmt, String> {
+        let name = match self.consume(TokenType::Identifier, "must define a variable name") {
+            Ok(t) => t,
+            Err(s) => return Err(s),
+        };
         if self.match_tokens(&[TokenType::Equal]) {
             let value = self.logical();
             self.consume(TokenType::Semicolon, "missing ; at the end of the line");
-            return Stmt::Var {
+            return Ok(Stmt::Var {
                 name,
-                value: Some(value),
-            };
+                value: Some(match value {
+                    Ok(t) => t,
+                    Err(s) => return Err(s),
+                }),
+            });
         }
-        self.consume(TokenType::Semicolon, "missing ; at the end of the line");
-        Stmt::Var {
-            name,
-            value: None::<Expr>,
-        }
+        match self.consume(TokenType::Semicolon, "missing ; at the end of the line") {
+            Ok(t) => t,
+            Err(s) => return Err(s),
+        };
+        Ok(Stmt::Var { name, value: None })
     }
 
-    fn statement(&mut self) -> Stmt {
+    fn statement(&mut self) -> Result<Stmt, String> {
         if self.match_tokens(&[TokenType::Print]) {
             self.print_stmt()
         } else if self.check(TokenType::LeftBrace) {
@@ -98,20 +122,38 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn return_stmt(&mut self) -> Stmt {
+    fn return_stmt(&mut self) -> Result<Stmt, String> {
         if self.match_tokens(&[TokenType::Semicolon]) {
-            return Stmt::Return(None, self.previous().line);
+            return Ok(Stmt::Return(None, self.previous().line));
         }
         let value = self.logical();
-        self.consume(TokenType::Semicolon, "missing ; at the end of lien");
-        Stmt::Return(Some(value), self.previous().line)
+        match self.consume(TokenType::Semicolon, "missing ; at the end of lien") {
+            Ok(t) => t,
+            Err(s) => return Err(s),
+        };
+        Ok(Stmt::Return(
+            Some(match value {
+                Ok(t) => t,
+                Err(s) => return Err(s),
+            }),
+            self.previous().line,
+        ))
     }
 
-    fn for_stmt(&mut self) -> Stmt {
-        let identifier = self.consume(TokenType::Identifier, "missing identifier 8=D");
+    fn for_stmt(&mut self) -> Result<Stmt, String> {
+        let identifier = match self.consume(TokenType::Identifier, "missing identifier 8=D") {
+            Ok(t) => t,
+            Err(s) => return Err(s),
+        };
         let line = self.previous().line;
-        self.consume(TokenType::In, "missing in");
-        let iterable = self.range();
+        match self.consume(TokenType::In, "missing in") {
+            Ok(t) => t,
+            Err(s) => return Err(s),
+        };
+        let iterable = match self.range() {
+            Ok(t) => t,
+            Err(s) => return Err(s),
+        };
         match iterable {
             Expr::Range {
                 min: _,
@@ -119,142 +161,202 @@ impl<'a> Parser<'a> {
                 step: _,
                 line: _,
             } => (),
-            _ => self.error("\"in\" must be used on an iterable"),
+            _ => return Err(self.error("\"in\" must be used on an iterable")),
         }
 
-        let block = Box::new(self.block());
-        Stmt::For {
+        let block = Box::new(match self.block() {
+            Ok(t) => t,
+            Err(s) => return Err(s),
+        });
+        Ok(Stmt::For {
             identifier,
             iterable,
             block,
             line,
-        }
+        })
     }
 
-    fn if_stmt(&mut self) -> Stmt {
-        let condition = self.logical();
+    fn if_stmt(&mut self) -> Result<Stmt, String> {
+        let condition = match self.logical() {
+            Ok(t) => t,
+            Err(s) => return Err(s),
+        };
         let start = self.previous().line;
-        let block = Box::new(self.block());
+        let block = Box::new(match self.block() {
+            Ok(t) => t,
+            Err(s) => return Err(s),
+        });
         if self.match_tokens(&[TokenType::Else]) {
             let end = self.previous().line;
-            let elseblock = Some(Box::new(self.block()));
-            return Stmt::If {
+            let elseblock = Some(Box::new(match self.block() {
+                Ok(t) => t,
+                Err(s) => return Err(s),
+            }));
+            return Ok(Stmt::If {
                 condition,
                 block,
                 elseblock,
                 lines: (start, Some(end)),
-            };
+            });
         }
-        Stmt::If {
+        Ok(Stmt::If {
             condition,
             block,
             elseblock: None,
             lines: (start, None),
-        }
+        })
     }
 
-    fn while_stmt(&mut self) -> Stmt {
-        let condition = self.logical();
+    fn while_stmt(&mut self) -> Result<Stmt, String> {
+        let condition = match self.logical() {
+            Ok(t) => t,
+            Err(s) => return Err(s),
+        };
         let line = self.previous().line;
-        let block = self.block();
+        let block = match self.block() {
+            Ok(t) => t,
+            Err(s) => return Err(s),
+        };
 
-        Stmt::While {
+        Ok(Stmt::While {
             condition,
             block: Box::new(block),
             line,
-        }
+        })
     }
 
-    fn block(&mut self) -> Stmt {
-        self.consume(TokenType::LeftBrace, "must start block with a {");
+    fn block(&mut self) -> Result<Stmt, String> {
+        match self.consume(TokenType::LeftBrace, "must start block with a {") {
+            Ok(t) => t,
+            Err(s) => return Err(s),
+        };
         let start = self.previous().line;
         let mut statements: Vec<Stmt> = Vec::new();
         while !self.is_at_end() && !self.check(TokenType::RightBrace) {
-            statements.push(self.declaration());
+            statements.push(match self.declaration() {
+                Ok(t) => t,
+                Err(s) => return Err(s),
+            });
         }
-        self.consume(TokenType::RightBrace, "must end block with a }");
-        Stmt::Block(statements, (start, self.previous().line))
+        match self.consume(TokenType::RightBrace, "must end block with a }") {
+            Ok(t) => t,
+            Err(s) => return Err(s),
+        };
+        Ok(Stmt::Block(statements, (start, self.previous().line)))
     }
 
-    fn print_stmt(&mut self) -> Stmt {
-        self.consume(
+    fn print_stmt(&mut self) -> Result<Stmt, String> {
+        match self.consume(
             TokenType::LeftParen,
             "gotta put ( after a print yk how it is..",
-        );
+        ) {
+            Ok(t) => t,
+            Err(s) => return Err(s),
+        };
         let stmt = Stmt::Print(
             match self.primary() {
-                Expr::Literal(Value::String { string, printables }, _) => {
+                Ok(Expr::Literal(Value::String { string, printables }, _)) => {
                     Value::String { string, printables }
                 }
+                Err(e) => return Err(e),
                 _ => {
-                    self.error("can only print strings");
-                    panic!("balls")
+                    return Err(self.error("can only print strings"));
                 }
             },
             self.peek().line,
         );
-        self.consume(
+        match self.consume(
             TokenType::RightParen,
             "gotta put ) at the end of a print yk how it is..",
-        );
-        self.consume(TokenType::Semicolon, "missing ; at the end of the line");
-        stmt
+        ) {
+            Ok(t) => t,
+            Err(s) => return Err(s),
+        };
+        match self.consume(TokenType::Semicolon, "missing ; at the end of the line") {
+            Ok(t) => t,
+            Err(s) => return Err(s),
+        };
+        Ok(stmt)
     }
-    fn expr_stmt(&mut self) -> Stmt {
-        let stmt = Stmt::Expression(self.assignment());
-        self.consume(TokenType::Semicolon, "missing ; at the end of the line");
-        stmt
+    fn expr_stmt(&mut self) -> Result<Stmt, String> {
+        let stmt = Stmt::Expression(match self.assignment() {
+            Ok(t) => t,
+            Err(s) => return Err(s),
+        });
+        match self.consume(TokenType::Semicolon, "missing ; at the end of the line") {
+            Ok(t) => t,
+            Err(s) => return Err(s),
+        };
+        Ok(stmt)
     }
 
-    pub fn assignment(&mut self) -> Expr {
-        let identifier = self.logical();
+    pub fn assignment(&mut self) -> Result<Expr, String> {
+        let identifier = match self.logical() {
+            Ok(t) => t,
+            Err(s) => return Err(s),
+        };
         if self.match_tokens(&[TokenType::Equal]) {
-            let value = self.logical();
+            let value = match self.logical() {
+                Ok(t) => t,
+                Err(s) => return Err(s),
+            };
             match identifier {
                 Expr::Variable(name) => {
-                    return Expr::Assign {
+                    return Ok(Expr::Assign {
                         name,
                         value: Box::new(value),
-                    }
+                    })
                 }
-                _ => {
-                    self.error("cannot assign to a non variable");
-                    panic!();
-                }
+                _ => return Err(self.error("cannot assign to a non variable")),
             }
         }
-        identifier
+        Ok(identifier)
     }
 
-    pub fn logical(&mut self) -> Expr {
-        let left: Expr = self.equality();
+    pub fn logical(&mut self) -> Result<Expr, String> {
+        let left: Expr = match self.equality() {
+            Ok(t) => t,
+            Err(s) => return Err(s),
+        };
         if self.match_tokens(&[TokenType::And, TokenType::Or]) {
             let operator = self.previous();
-            let right: Expr = self.logical();
-            return Expr::Binary {
+            let right: Expr = match self.logical() {
+                Ok(t) => t,
+                Err(s) => return Err(s),
+            };
+            return Ok(Expr::Binary {
                 left: Box::new(left),
                 operator,
                 right: Box::new(right),
-            };
+            });
         }
-        left
+        Ok(left)
     }
 
-    fn equality(&mut self) -> Expr {
-        let left: Expr = self.comparison();
+    fn equality(&mut self) -> Result<Expr, String> {
+        let left: Expr = match self.comparison() {
+            Ok(t) => t,
+            Err(s) => return Err(s),
+        };
         if self.match_tokens(&[TokenType::BangEqual, TokenType::EqualEqual]) {
             let operator = self.previous();
-            let right: Expr = self.comparison();
-            return Expr::Binary {
+            let right: Expr = match self.comparison() {
+                Ok(t) => t,
+                Err(s) => return Err(s),
+            };
+            return Ok(Expr::Binary {
                 left: Box::new(left),
                 operator,
                 right: Box::new(right),
-            };
+            });
         }
-        left
+        Ok(left)
     }
-    fn comparison(&mut self) -> Expr {
-        let left: Expr = self.term();
+    fn comparison(&mut self) -> Result<Expr, String> {
+        let left: Expr = match self.term() {
+            Ok(t) => t,
+            Err(s) => return Err(s),
+        };
         if self.match_tokens(&[
             TokenType::Greater,
             TokenType::GreaterEqual,
@@ -262,140 +364,179 @@ impl<'a> Parser<'a> {
             TokenType::LessEqual,
         ]) {
             let operator = self.previous();
-            let right: Expr = self.term();
-            return Expr::Binary {
+            let right: Expr = match self.term() {
+                Ok(t) => t,
+                Err(s) => return Err(s),
+            };
+            return Ok(Expr::Binary {
                 left: Box::new(left),
                 operator,
                 right: Box::new(right),
-            };
+            });
         }
-        left
+        Ok(left)
     }
-    fn term(&mut self) -> Expr {
-        let left: Expr = self.factor();
+    fn term(&mut self) -> Result<Expr, String> {
+        let left: Expr = match self.factor() {
+            Ok(t) => t,
+            Err(s) => return Err(s),
+        };
         if self.match_tokens(&[TokenType::Plus, TokenType::Minus]) {
             let operator = self.previous();
-            let right: Expr = self.term();
-            return Expr::Binary {
+            let right: Expr = match self.term() {
+                Ok(t) => t,
+                Err(s) => return Err(s),
+            };
+            return Ok(Expr::Binary {
                 left: Box::new(left),
                 operator,
                 right: Box::new(right),
-            };
+            });
         }
-        left
+        Ok(left)
     }
-    fn factor(&mut self) -> Expr {
-        let left: Expr = self.range();
+    fn factor(&mut self) -> Result<Expr, String> {
+        let left: Expr = match self.range() {
+            Ok(t) => t,
+            Err(s) => return Err(s),
+        };
         if self.match_tokens(&[TokenType::Slash, TokenType::Star, TokenType::Modulo]) {
             let operator = self.previous();
-            let right: Expr = self.factor();
-            return Expr::Binary {
+            let right: Expr = match self.factor() {
+                Ok(t) => t,
+                Err(s) => return Err(s),
+            };
+            return Ok(Expr::Binary {
                 left: Box::new(left),
                 operator,
                 right: Box::new(right),
-            };
+            });
         }
-        left
+        Ok(left)
     }
-    pub fn range(&mut self) -> Expr {
-        let start = self.unary();
+    pub fn range(&mut self) -> Result<Expr, String> {
+        let start = match self.unary() {
+            Ok(t) => t,
+            Err(s) => return Err(s),
+        };
         if self.match_tokens(&[TokenType::Range]) {
             match &start {
                 Expr::Literal(Value::Number(_), _) | Expr::Variable(_) => {}
-                _ => {
-                    self.error("you can only index a range using an integer");
-                    panic!();
-                }
+                _ => return Err(self.error("you can only index a range using an integer")),
             }
-            let end = self.unary();
+            let end = match self.unary() {
+                Ok(t) => t,
+                Err(s) => return Err(s),
+            };
             match &end {
                 Expr::Literal(Value::Number(_), _) | Expr::Variable(_) => {}
-                _ => {
-                    self.error("you can only index a range using an integer");
-                    panic!();
-                }
+                _ => return Err(self.error("you can only index a range using an integer")),
             }
             if self.match_tokens(&[TokenType::Range]) {
-                let step = self.unary();
+                let step = match self.unary() {
+                    Ok(t) => t,
+                    Err(s) => return Err(s),
+                };
                 match &step {
                     Expr::Literal(Value::Number(_), _) | Expr::Variable(_) => {}
-                    _ => {
-                        self.error("you can only index a range using an integer");
-                        panic!();
-                    }
+                    _ => return Err(self.error("you can only index a range using an integer")),
                 }
-                return Expr::Range {
+                return Ok(Expr::Range {
                     min: Box::new(start),
                     max: Box::new(end),
                     step: Some(Box::new(step)),
                     line: self.previous().line,
-                };
+                });
             }
-            return Expr::Range {
+            return Ok(Expr::Range {
                 min: Box::new(start),
                 max: Box::new(end),
                 step: None,
                 line: self.previous().line,
-            };
+            });
         }
-        start
+        Ok(start)
     }
-    fn unary(&mut self) -> Expr {
+    fn unary(&mut self) -> Result<Expr, String> {
         if self.match_tokens(&[TokenType::Bang, TokenType::Minus]) {
             let operator = self.previous();
-            let e = self.primary();
-            return Expr::Unary {
+            let e = match self.primary() {
+                Ok(t) => t,
+                Err(s) => return Err(s),
+            };
+            return Ok(Expr::Unary {
                 operator,
                 expression: Box::new(e),
-            };
+            });
         }
         self.call(false)
     }
 
-    fn call(&mut self, native: bool) -> Expr {
-        let expr = self.primary();
+    fn call(&mut self, native: bool) -> Result<Expr, String> {
+        let expr = match self.primary() {
+            Ok(t) => t,
+            Err(s) => return Err(s),
+        };
         if self.match_tokens(&[TokenType::LeftParen]) {
             if !matches!(expr, Expr::Variable(_)) {
-                self.error("sir were you trying to call a function USING AN INTEGER?")
+                return Err(self.error("sir were you trying to call a function USING AN INTEGER?"));
             }
             if self.match_tokens(&[TokenType::RightParen]) {
-                return Expr::Call {
+                return Ok(Expr::Call {
                     callee: Box::new(expr),
                     arguments: Vec::new(),
                     native,
-                };
+                });
             }
             let mut vec: Vec<Expr> = Vec::new();
-            vec.push(self.logical());
+            vec.push(match self.logical() {
+                Ok(t) => t,
+                Err(s) => return Err(s),
+            });
             while self.match_tokens(&[TokenType::Comma]) {
-                vec.push(self.logical());
+                vec.push(match self.logical() {
+                    Ok(t) => t,
+                    Err(s) => return Err(s),
+                });
             }
-            self.consume(TokenType::RightParen, "gotta close the call dude");
-            return Expr::Call {
+            match self.consume(TokenType::RightParen, "gotta close the call dude") {
+                Ok(t) => t,
+                Err(s) => return Err(s),
+            };
+            return Ok(Expr::Call {
                 callee: Box::new(expr),
                 arguments: vec,
                 native,
-            };
+            });
         }
-        expr
+        Ok(expr)
     }
 
-    fn primary(&mut self) -> Expr {
+    fn primary(&mut self) -> Result<Expr, String> {
         if self.match_tokens(&[TokenType::Bool]) {
             if self.previous().lexeme == "true" {
-                return Expr::Literal(Value::Bool(true), self.previous().line);
+                return Ok(Expr::Literal(Value::Bool(true), self.previous().line));
             } else {
-                return Expr::Literal(Value::Bool(false), self.previous().line);
+                return Ok(Expr::Literal(Value::Bool(false), self.previous().line));
             }
         }
         if self.match_tokens(&[TokenType::LeftSquare]) {
             let mut vec: Vec<Expr> = Vec::new();
-            vec.push(self.logical());
+            vec.push(match self.logical() {
+                Ok(t) => t,
+                Err(s) => return Err(s),
+            });
             while self.match_tokens(&[TokenType::Comma]) {
-                vec.push(self.logical());
+                vec.push(match self.logical() {
+                    Ok(t) => t,
+                    Err(s) => return Err(s),
+                });
             }
-            self.consume(TokenType::RightSquare, "gotta close the vec");
-            return Expr::Vec(vec);
+            match self.consume(TokenType::RightSquare, "gotta close the vec") {
+                Ok(t) => t,
+                Err(s) => return Err(s),
+            };
+            return Ok(Expr::Vec(vec));
         }
         if self.match_tokens(&[TokenType::String]) {
             let string = self.previous().lexeme;
@@ -403,10 +544,14 @@ impl<'a> Parser<'a> {
             while self.match_tokens(&[TokenType::Printable]) {
                 let lexeme = self.previous().lexeme;
                 if lexeme.contains('"') {
-                    self.error("why would you use a string inside a string?? are you retarded??");
+                    return Err(self
+                        .error("why would you use a string inside a string?? are you retarded??"));
                 }
-                let mut s = Scanner::new(&lexeme, self.filename);
-                let mut s1 = s.scan_tokens();
+                let mut s = Scanner::new(&lexeme);
+                let mut s1 = match s.scan_tokens() {
+                    Ok(s) => s,
+                    Err(err) => panic!(),
+                };
                 s1.pop();
                 printables_t.push(s1);
                 self.match_tokens(&[TokenType::Comma]);
@@ -414,30 +559,44 @@ impl<'a> Parser<'a> {
             let mut printables: Vec<Expr> = Vec::new();
             for i in printables_t {
                 self.tokens.splice(self.current..self.current, i);
-                printables.push(self.logical());
+                printables.push(match self.logical() {
+                    Ok(t) => t,
+                    Err(s) => return Err(s),
+                });
             }
-            return Expr::Literal(Value::String { string, printables }, self.previous().line);
+            return Ok(Expr::Literal(
+                Value::String { string, printables },
+                self.previous().line,
+            ));
         }
 
         if self.match_tokens(&[TokenType::Int, TokenType::Float]) {
-            return Expr::Literal(self.previous().literal.unwrap(), self.previous().line);
+            return Ok(Expr::Literal(
+                self.previous().literal.unwrap(),
+                self.previous().line,
+            ));
         }
         if self.match_tokens(&[TokenType::LeftParen]) {
-            let expression = self.logical();
-            self.consume(
+            let expression = match self.logical() {
+                Ok(t) => t,
+                Err(s) => return Err(s),
+            };
+            match self.consume(
                 TokenType::RightParen,
                 "expected \")\" after expression u piece of shit",
-            );
-            return Expr::Grouping(Box::new(expression));
+            ) {
+                Ok(t) => t,
+                Err(s) => return Err(s),
+            };
+            return Ok(Expr::Grouping(Box::new(expression)));
         }
         if self.match_tokens(&[TokenType::NativeCall]) {
             return self.call(true);
         }
         if self.match_tokens(&[TokenType::Identifier]) {
-            return Expr::Variable(self.previous());
+            return Ok(Expr::Variable(self.previous()));
         }
-        self.error(&format!("expected value found {}", self.peek().tt));
-        panic!("cock!")
+        Err(self.error(&format!("expected value found {}", self.peek().tt)))
     }
 
     fn match_tokens(&mut self, types: &[TokenType]) -> bool {
@@ -472,19 +631,14 @@ impl<'a> Parser<'a> {
     fn previous(&self) -> Token {
         self.tokens[self.current - 1].clone()
     }
-    fn error(&self, msg: &str) {
-        KlangError::error(
-            KlangError::ParserError,
-            msg,
-            self.peek().line,
-            self.filename,
-        );
+    fn error(&self, msg: &str) -> String {
+        KlangError::error(KlangError::ParserError, msg, self.peek().line)
     }
-    fn consume(&mut self, t_type: TokenType, msg: &str) -> Token {
+    fn consume(&mut self, t_type: TokenType, msg: &str) -> Result<Token, String> {
         if self.peek().tt == t_type {
-            return self.advance();
+            return Ok(self.advance());
         }
-        self.error(msg);
-        panic!()
+        println!("BRuh");
+        Err(self.error(msg))
     }
 }
