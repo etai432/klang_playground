@@ -41,4 +41,3 @@ print("3 + 5 = {add(3, 5)}");
 - Time Functions: `time` `sleep`
 - Vector functions: `get(vec, index)` `set(vec, value, index)` `remove(vec, index)` `insert(vec, value, index)`
 - use them by doing `std::` and add the function name
-- you can start your print with `[` to make it errprint (its a feature not a bug i promise)
