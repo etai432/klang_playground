@@ -154,16 +154,6 @@ impl Parser {
             Ok(t) => t,
             Err(s) => return Err(s),
         };
-        match iterable {
-            Expr::Range {
-                min: _,
-                max: _,
-                step: _,
-                line: _,
-            } => (),
-            _ => return Err(self.error("\"in\" must be used on an iterable")),
-        }
-
         let block = Box::new(match self.block() {
             Ok(t) => t,
             Err(s) => return Err(s),
@@ -510,6 +500,9 @@ impl Parser {
         }
         if self.match_tokens(&[TokenType::LeftSquare]) {
             let mut vec: Vec<Expr> = Vec::new();
+            if self.match_tokens(&[TokenType::RightSquare]) {
+                return Ok(Expr::Vec(vec));
+            }
             vec.push(match self.logical() {
                 Ok(t) => t,
                 Err(s) => return Err(s),

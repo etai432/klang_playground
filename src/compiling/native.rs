@@ -311,6 +311,18 @@ pub fn vector_natives() -> Vec<NativeFn> {
             }
         }),
     });
+    natives.push(NativeFn {
+        name: "len".to_string(),
+        args: 1,
+        function: Box::new(|mut args| {
+            if let Value::Vec(vec) = args.pop().unwrap() {
+                Some(Value::Number(vec.len() as f64))
+            } else {
+                error("expected a (vector)");
+                panic!()
+            }
+        }),
+    });
 
     natives
 }
