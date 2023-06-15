@@ -590,8 +590,15 @@ impl VM {
         self.create_inner();
         for i in fun.1.into_iter().rev() {
             let mut scope: &mut Scope = &mut self.global;
+            let mut counter = 0;
             while scope.inner.as_mut().unwrap().inner.is_some() {
                 scope = scope.inner.as_mut().unwrap();
+                counter += 1;
+            }
+            if counter > 1000 {
+                return Some(self.error(
+                    "your recursion is 1000 layers deep- bro thinks he can crash klang :skull:",
+                ));
             }
             let pop = match scope.stack.pop() {
                 Some(x) => x,

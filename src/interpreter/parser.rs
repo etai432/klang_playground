@@ -382,27 +382,15 @@ impl Parser {
             Err(s) => return Err(s),
         };
         if self.match_tokens(&[TokenType::Range]) {
-            // match &start {
-            //     Expr::Literal(Value::Number(_), _) | Expr::Variable(_) => {}
-            //     _ => return Err(self.error("you can only index a range using an integer")),
-            // }
             let end = match self.term() {
                 Ok(t) => t,
                 Err(s) => return Err(s),
             };
-            // match &end {
-            //     Expr::Literal(Value::Number(_), _) | Expr::Variable(_) => {}
-            //     _ => return Err(self.error("you can only index a range using an integer")),
-            // }
             if self.match_tokens(&[TokenType::Range]) {
                 let step = match self.term() {
                     Ok(t) => t,
                     Err(s) => return Err(s),
                 };
-                // match &step {
-                //     Expr::Literal(Value::Number(_), _) | Expr::Variable(_) => {}
-                //     _ => return Err(self.error("you can only index a range using an integer")),
-                // }
                 return Ok(Expr::Range {
                     min: Box::new(start),
                     max: Box::new(end),
