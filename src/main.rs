@@ -13,9 +13,9 @@ fn index() -> RawHtml<&'static str> {
     RawHtml(include_str!("temp.html"))
 }
 
-#[launch]
-fn rocket() -> _ {
-    rocket::build().mount("/", routes![index, run])
+#[shuttle_runtime::main]
+async fn rocket() -> shuttle_rocket::ShuttleRocket {
+    Ok(rocket::build().mount("/", routes![index, run]).into())
 }
 
 #[post("/", data = "<source>")]
