@@ -595,9 +595,9 @@ impl VM {
                 scope = scope.inner.as_mut().unwrap();
                 counter += 1;
             }
-            if counter > 1000 {
+            if counter > 100 {
                 return Some(self.error(
-                    "your recursion is 1000 layers deep- bro thinks he can crash klang :skull:",
+                    "your recursion is 100 layers deep- bro thinks he can crash klang :skull:",
                 ));
             }
             let pop = match scope.stack.pop() {
