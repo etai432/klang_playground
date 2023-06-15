@@ -415,7 +415,7 @@ impl Parser {
         Ok(left)
     }
     pub fn range(&mut self) -> Result<Expr, String> {
-        let start = match self.primary() {
+        let start = match self.unary() {
             Ok(t) => t,
             Err(s) => return Err(s),
         };
@@ -638,7 +638,6 @@ impl Parser {
         if self.peek().tt == t_type {
             return Ok(self.advance());
         }
-        println!("BRuh");
         Err(self.error(msg))
     }
 }

@@ -26,18 +26,22 @@ impl VM {
     }
     pub fn run(&mut self) -> String {
         let mut output = String::new();
+        let mut jumps = 0;
         //executes the code on the chunk
         while self.index < self.chunk.code.len() as i32 {
-            output += match self.once() {
+            output += match self.once(&mut jumps) {
                 Ok(s) => s,
                 Err(s) => return s,
             }
             .as_str();
             self.index += 1;
+            if jumps > 100000 {
+                return self.error("infinite loop is bad..");
+            }
         }
         output
     }
-    pub fn once(&mut self) -> Result<String, String> {
+    pub fn once(&mut self, jumps: &mut i32) -> Result<String, String> {
         // println!("{:?}", self.global);
         match self.chunk.code[self.index as usize].clone() {
             OpCode::Constant(x) => self.push(x),
@@ -138,16 +142,22 @@ impl VM {
                         Some(x) => x,
                         None => return Err(self.error("stack overflow (cant pop an empty stack)")),
                     } {
+                        *jumps = 0;
                         if self.index + x > self.chunk.code.len() as i32 {
                             return Err(self.error("cannot jump out of bounds like ur dad jumped out of the 50th story window bozo"));
                         }
                         self.index += x;
+                    } else {
+                        *jumps += 1;
                     }
                 } else if let Ok(Value::Bool(true)) = self.top() {
+                    *jumps = 0;
                     if self.index + x > self.chunk.code.len() as i32 {
                         return Err(self.error("cannot jump out of bounds like ur dad jumped out of the 50th story window bozo"));
                     }
                     self.index += x;
+                } else {
+                    *jumps += 1;
                 }
             }
             OpCode::Call(x) => {
