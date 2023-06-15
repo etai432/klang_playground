@@ -151,7 +151,9 @@ impl VM {
                 }
             }
             OpCode::Call(x) => {
-                self.call(x, self.index);
+                if let Some(s) = self.call(x, self.index) {
+                    return Err(s);
+                }
             }
             OpCode::NativeCall(x, y) => {
                 if let Some(s) = self.native_call(x, y) {
@@ -209,7 +211,11 @@ impl VM {
                     return Err(s);
                 }
             }
-            OpCode::Fn => self.function(),
+            OpCode::Fn => {
+                if let Some(s) = self.function() {
+                    return Err(s);
+                }
+            }
             OpCode::Iterable(x) => {
                 if let Some(s) = self.iterable(x) {
                     return Err(s);
@@ -236,7 +242,7 @@ impl VM {
         self.push(Value::Vec(vec1));
         None
     }
-    fn function(&mut self) {
+    fn function(&mut self) -> Option<String> {
         self.index += 1; //consume fn
         let mut args: Vec<String> = Vec::new();
         while match self.chunk.code[self.index as usize].clone() {
@@ -264,11 +270,9 @@ impl VM {
         self.index += 1;
         match self.chunk.code[self.index as usize].clone() {
             OpCode::Store(x) => self.functions.insert(x, (bytes, args)),
-            _ => {
-                self.error("ksang made a little oopsy");
-                panic!();
-            }
+            _ => return Some(self.error("ksang made a little oopsy")),
         };
+        None
     }
     fn range(&mut self, cstep: bool) -> Option<String> {
         if cstep {

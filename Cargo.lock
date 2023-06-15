@@ -574,17 +574,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "95505c38b4572b2d910cecb0281560f54b440a19336cbbcb27bf6ce6adc6f5a8"
 
 [[package]]
-name = "hello-there-test"
-version = "0.1.0"
-dependencies = [
- "rand",
- "rocket",
- "shuttle-rocket",
- "shuttle-runtime",
- "tokio",
-]
-
-[[package]]
 name = "hermit-abi"
 version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -802,6 +791,17 @@ dependencies = [
  "serde",
  "serde_json",
  "simple_asn1",
+]
+
+[[package]]
+name = "kplayground"
+version = "0.1.0"
+dependencies = [
+ "rand",
+ "rocket",
+ "shuttle-rocket",
+ "shuttle-runtime",
+ "tokio",
 ]
 
 [[package]]
