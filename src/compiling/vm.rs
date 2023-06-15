@@ -359,7 +359,7 @@ impl VM {
                 printables: _,
             }) => string,
             _ => {
-                panic!()
+                return Err(self.error("is it even possible to get here?"));
             }
         };
         for _ in 0..self.count_braces(print.as_str()) {
@@ -582,9 +582,10 @@ impl VM {
         None
     }
     fn call(&mut self, callee: String, index: i32) -> Option<String> {
+        println!("call");
         let mut scope: &mut Scope = &mut self.global;
         let mut counter = 0;
-        while scope.inner.as_mut().unwrap().inner.is_some() {
+        while scope.inner.is_some() {
             scope = scope.inner.as_mut().unwrap();
             counter += 1;
         }

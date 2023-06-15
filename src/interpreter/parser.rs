@@ -79,7 +79,7 @@ impl Parser {
                 }),
             });
         }
-        panic!()
+        Err(self.error("not possible!"))
     }
     fn var_decl(&mut self) -> Result<Stmt, String> {
         let name = match self.consume(TokenType::Identifier, "must define a variable name") {
@@ -538,7 +538,7 @@ impl Parser {
                 let mut s = Scanner::new(&lexeme);
                 let mut s1 = match s.scan_tokens() {
                     Ok(s) => s,
-                    Err(err) => panic!(),
+                    Err(err) => return Err(err),
                 };
                 s1.pop();
                 printables_t.push(s1);
