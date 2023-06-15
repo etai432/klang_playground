@@ -58,7 +58,7 @@
                 .then(response => response.text())
                 .then(output => {
                     document.getElementById("output").innerText = output;
-                    if (output.startsWith("[")) {
+                    if (output.startsWith("[ScannerError]") || output.startsWith("[ParserError]") || output.startsWith("[RuntimeError]")) {
                         document.getElementById("output").style.color = "red";
                     } else {
                         document.getElementById("output").style.color = "purple";
