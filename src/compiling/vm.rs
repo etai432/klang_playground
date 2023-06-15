@@ -506,7 +506,7 @@ impl VM {
                         printables1
                     },
                 },
-                _ => return Some(self.error("can only add numbers")),
+                _ => return Some(self.error("can only add numbers and strings")),
             },
             TokenType::Minus => match pop2 {
                 (Value::Number(x), Value::Number(y)) => Value::Number(y - x),
