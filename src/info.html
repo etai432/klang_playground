@@ -56,7 +56,7 @@
         }
 
         li {
-            margin-bottom: 5px;
+            margin-bottom: 7px;
             color: #dcdcdc;
         }
 
@@ -98,6 +98,8 @@
         </li>
         <li>Variable declaration: Use <code>let identifier = value</code> syntax; variables do not require an initial
             value.</li>
+        <li>vector declaration: <code>let vec = []</code>, you can put any values you want inside the <code>[]</code>.
+        </li>
         <li>Control flow: Klang uses <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code>,
             <code>==</code>, <code>&amp;&amp;</code>, <code>||</code> for control flow.
         </li>
@@ -115,7 +117,8 @@
     <ul>
         <li>Loops:</li>
         <ul>
-            <li>For loop: <code>for identifier in iterable { code }</code></li>
+            <li>For loop: <code>for identifier in iterable { code }</code> (for loops ar not always stable. i recommend
+                using while loops if encountering problems)</li>
             <li>While loop: <code>while bool { code }</code></li>
             <li>Range: <code>int..int</code> (exclusive), <code>int..int..int3</code> (exclusive, with step size
                 <code>int3</code>, floats will be rounded down, step must be bigger than 1)
@@ -149,8 +152,9 @@ print("3 + 5 = {add(3, 5)}");</pre>
         <li>Random Functions: <code>random</code>, <code>range</code>, <code>randbool</code></li>
         <li>Time Functions: <code>time</code>, <code>sleep</code></li>
         <li>Vector functions: <code>get(vec, index)</code>, <code>set(vec, value, index)</code>,
-            <code>remove(vec, index)</code>, <code>insert(vec, value, index)</code>
+            <code>remove(vec, index)</code>, <code>insert(vec, value, index)</code>, <code>len(vec)</code>
         </li>
+        <li>the set, remove and insert functions return a new vector.</li>
         <li>Use them by prefixing <code>std::</code> and adding the function name.</li>
     </ul>
 </body>
