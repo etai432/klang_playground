@@ -490,6 +490,22 @@ impl VM {
         self.push(match operation {
             TokenType::Plus => match pop2 {
                 (Value::Number(x), Value::Number(y)) => Value::Number(x + y),
+                (
+                    Value::String {
+                        string,
+                        printables: mut printables1,
+                    },
+                    Value::String {
+                        string: string1,
+                        printables: printables2,
+                    },
+                ) => Value::String {
+                    string: string + string1.as_str(),
+                    printables: {
+                        printables1.splice(printables1.len()..printables1.len(), printables2);
+                        printables1
+                    },
+                },
                 _ => return Some(self.error("can only add numbers")),
             },
             TokenType::Minus => match pop2 {
