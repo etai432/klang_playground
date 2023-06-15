@@ -36,7 +36,7 @@ impl VM {
             .as_str();
             self.index += 1;
             if jumps > 100000 {
-                return self.error("infinite loop is bad..");
+                return self.error("infinite loop is bad.. (over 100k repetitions)");
             }
         }
         output
