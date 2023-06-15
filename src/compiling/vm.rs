@@ -179,7 +179,9 @@ impl VM {
 
             OpCode::Scope => self.create_inner(),
             OpCode::EndScope => self.close_inner(),
-            OpCode::EndFn => {}
+            OpCode::EndFn => {
+                self.push(Value::None);
+            }
             OpCode::Return(x) => {
                 if x {
                     let val = match self.pop() {
@@ -214,6 +216,7 @@ impl VM {
                     for _ in 0..counter {
                         self.close_inner()
                     }
+                    self.push(Value::None);
                 }
             }
             OpCode::For => {
@@ -329,7 +332,7 @@ impl VM {
     fn for_loop(&mut self) -> Option<String> {
         let range = match self.pop() {
             Some(x) => x,
-            None => return Some(self.error("invalid witewabwe!")),
+            None => return Some(self.error("Stack overflow (cant pop an empty stack)")),
         };
         let mut vector = match range {
             Value::Vec(x) => x,
