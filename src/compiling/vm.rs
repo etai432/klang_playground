@@ -277,7 +277,12 @@ impl VM {
     fn range(&mut self, cstep: bool) -> Option<String> {
         if cstep {
             let step = match self.pop() {
-                Some(Value::Number(x)) => x,
+                Some(Value::Number(x)) => {
+                    if x == 0.0 {
+                        return Some(self.error("cannot use 0 as step!"));
+                    };
+                    x
+                }
                 _ => return Some(self.error("step is not a number")),
             };
             let end = match self.pop() {

@@ -415,7 +415,7 @@ impl Parser {
         Ok(left)
     }
     pub fn range(&mut self) -> Result<Expr, String> {
-        let start = match self.unary() {
+        let start = match self.primary() {
             Ok(t) => t,
             Err(s) => return Err(s),
         };
@@ -424,7 +424,7 @@ impl Parser {
                 Expr::Literal(Value::Number(_), _) | Expr::Variable(_) => {}
                 _ => return Err(self.error("you can only index a range using an integer")),
             }
-            let end = match self.unary() {
+            let end = match self.primary() {
                 Ok(t) => t,
                 Err(s) => return Err(s),
             };
@@ -433,7 +433,7 @@ impl Parser {
                 _ => return Err(self.error("you can only index a range using an integer")),
             }
             if self.match_tokens(&[TokenType::Range]) {
-                let step = match self.unary() {
+                let step = match self.primary() {
                     Ok(t) => t,
                     Err(s) => return Err(s),
                 };
