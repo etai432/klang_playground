@@ -353,7 +353,7 @@ impl Parser {
         Ok(left)
     }
     fn comparison(&mut self) -> Result<Expr, String> {
-        let left: Expr = match self.term() {
+        let left: Expr = match self.range() {
             Ok(t) => t,
             Err(s) => return Err(s),
         };
@@ -376,6 +376,49 @@ impl Parser {
         }
         Ok(left)
     }
+    pub fn range(&mut self) -> Result<Expr, String> {
+        let start = match self.term() {
+            Ok(t) => t,
+            Err(s) => return Err(s),
+        };
+        if self.match_tokens(&[TokenType::Range]) {
+            // match &start {
+            //     Expr::Literal(Value::Number(_), _) | Expr::Variable(_) => {}
+            //     _ => return Err(self.error("you can only index a range using an integer")),
+            // }
+            let end = match self.term() {
+                Ok(t) => t,
+                Err(s) => return Err(s),
+            };
+            // match &end {
+            //     Expr::Literal(Value::Number(_), _) | Expr::Variable(_) => {}
+            //     _ => return Err(self.error("you can only index a range using an integer")),
+            // }
+            if self.match_tokens(&[TokenType::Range]) {
+                let step = match self.term() {
+                    Ok(t) => t,
+                    Err(s) => return Err(s),
+                };
+                // match &step {
+                //     Expr::Literal(Value::Number(_), _) | Expr::Variable(_) => {}
+                //     _ => return Err(self.error("you can only index a range using an integer")),
+                // }
+                return Ok(Expr::Range {
+                    min: Box::new(start),
+                    max: Box::new(end),
+                    step: Some(Box::new(step)),
+                    line: self.previous().line,
+                });
+            }
+            return Ok(Expr::Range {
+                min: Box::new(start),
+                max: Box::new(end),
+                step: None,
+                line: self.previous().line,
+            });
+        }
+        Ok(start)
+    }
     fn term(&mut self) -> Result<Expr, String> {
         let left: Expr = match self.factor() {
             Ok(t) => t,
@@ -396,7 +439,7 @@ impl Parser {
         Ok(left)
     }
     fn factor(&mut self) -> Result<Expr, String> {
-        let left: Expr = match self.range() {
+        let left: Expr = match self.unary() {
             Ok(t) => t,
             Err(s) => return Err(s),
         };
@@ -413,49 +456,6 @@ impl Parser {
             });
         }
         Ok(left)
-    }
-    pub fn range(&mut self) -> Result<Expr, String> {
-        let start = match self.unary() {
-            Ok(t) => t,
-            Err(s) => return Err(s),
-        };
-        if self.match_tokens(&[TokenType::Range]) {
-            match &start {
-                Expr::Literal(Value::Number(_), _) | Expr::Variable(_) => {}
-                _ => return Err(self.error("you can only index a range using an integer")),
-            }
-            let end = match self.primary() {
-                Ok(t) => t,
-                Err(s) => return Err(s),
-            };
-            match &end {
-                Expr::Literal(Value::Number(_), _) | Expr::Variable(_) => {}
-                _ => return Err(self.error("you can only index a range using an integer")),
-            }
-            if self.match_tokens(&[TokenType::Range]) {
-                let step = match self.primary() {
-                    Ok(t) => t,
-                    Err(s) => return Err(s),
-                };
-                match &step {
-                    Expr::Literal(Value::Number(_), _) | Expr::Variable(_) => {}
-                    _ => return Err(self.error("you can only index a range using an integer")),
-                }
-                return Ok(Expr::Range {
-                    min: Box::new(start),
-                    max: Box::new(end),
-                    step: Some(Box::new(step)),
-                    line: self.previous().line,
-                });
-            }
-            return Ok(Expr::Range {
-                min: Box::new(start),
-                max: Box::new(end),
-                step: None,
-                line: self.previous().line,
-            });
-        }
-        Ok(start)
     }
     fn unary(&mut self) -> Result<Expr, String> {
         if self.match_tokens(&[TokenType::Bang, TokenType::Minus]) {

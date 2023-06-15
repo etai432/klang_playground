@@ -288,10 +288,10 @@ impl VM {
         if cstep {
             let step = match self.pop() {
                 Some(Value::Number(x)) => {
-                    if x == 0.0 {
-                        return Some(self.error("cannot use 0 as step!"));
+                    if x < 1.0 {
+                        return Some(self.error("cannot use anything smaller than 1 as a step!"));
                     };
-                    x
+                    x as usize
                 }
                 _ => return Some(self.error("step is not a number")),
             };
@@ -304,7 +304,7 @@ impl VM {
                 _ => return Some(self.error("start is not a number")),
             };
             let mut vec: Vec<Value> = Vec::new();
-            for i in (start as usize..end as usize).step_by(step as usize) {
+            for i in (start as i32..end as i32).step_by(step) {
                 vec.push(Value::Number(i as f64));
             }
             self.push(Value::Vec(vec));
@@ -319,7 +319,7 @@ impl VM {
                 _ => return Some(self.error("start is not a number")),
             };
             let mut vec: Vec<Value> = Vec::new();
-            for i in start as usize..end as usize {
+            for i in start as i32..end as i32 {
                 vec.push(Value::Number(i as f64));
             }
             self.push(Value::Vec(vec));
