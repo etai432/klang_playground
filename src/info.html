@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klang Language - Its Rust... But Dynamic!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #131313;
+            color: #dcdcdc;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 28px;
+            color: #ff9900;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 24px;
+            color: #ff9900;
+            margin-bottom: 10px;
+        }
+
+        code {
+            background-color: #242424;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: Consolas, monospace;
+            color: #54d36f;
+        }
+
+        pre {
+            background-color: #242424;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: Consolas, monospace;
+            color: #54d36f;
+        }
+
+        p {
+            color: #4dcff0;
+            margin-bottom: 10px;
+        }
+
+        ul {
+            color: #dcdcdc;
+            margin-bottom: 10px;
+            list-style-type: disc;
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 5px;
+            color: #dcdcdc;
+        }
+
+        h3 {
+            font-size: 18px;
+            color: #ff9900;
+            margin-bottom: 10px;
+        }
+
+        .redirect-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #00a2ff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        .redirect-button:hover {
+            background-color: #1c39df;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="/" class="redirect-button">back to the playground</a>
+    <h1>Klang Language - Its Rust... But Dynamic!</h1>
+    <p>Klang is a dynamic programming language interpreted using Rust.</p>
+    <h2>Language Overview</h2>
+    <ul>
+        <li>Klang starts running from the first line of code.</li>
+        <li>Indentations are not mandatory, but it is strongly recommended to adhere to formal indentation rules for
+            clean and readable code.</li>
+        <li>Klang has four simple types: <code>bool</code>, <code>number</code>, <code>string</code>, and
+            <code>vector</code>.
+        </li>
+        <li>Variable declaration: Use <code>let identifier = value</code> syntax; variables do not require an initial
+            value.</li>
+        <li>Control flow: Klang uses <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code>,
+            <code>==</code>, <code>&amp;&amp;</code>, <code>||</code> for control flow.
+        </li>
+        <li>Arithmetic operations: Klang uses <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>,
+            <code>%</code> for basic arithmetic operations.
+        </li>
+        <li>If statement:</li>
+    </ul>
+    <pre>if expression {
+    code
+} else {
+    code
+}</pre>
+
+    <ul>
+        <li>Loops:</li>
+        <ul>
+            <li>For loop: <code>for identifier in iterable { code }</code></li>
+            <li>While loop: <code>while bool { code }</code></li>
+            <li>Range: <code>int..int</code> (exclusive), <code>int..int..int3</code> (exclusive, with step size
+                <code>int3</code>, floats will be rounded down, step must be bigger than 1)
+            </li>
+        </ul>
+        <li>Scoping: Klang uses <code>{}</code> for scoping.</li>
+        <li>I/O: Klang uses <code>print()</code> for output and <code>std::read()</code> for input.</li>
+        <li>Klang allows custom format inside strings <code>"hi {1+2}"</code> would be <code>hi 3</code>, but doesn't
+            allow recursive formatting (formatting inside formatting).</li>
+        <li>Meaning you can print anything you want using 1 print statement! For example:</li>
+        <pre>print("3 pi is: {3 * std::pi()}");</pre>
+        <li>Error handling: Klang does not feature explicit error handling. Errors are handled by the parser, scanner,
+            and compiler, and reported to the developer in the terminal.</li>
+        <li>Functions: All functions in Klang are public.</li>
+        <li>The way you declare a function is: <code>fn name(arg1, arg2) {</code></li>
+        <li>You can then use <code>return value;</code> or <code>return;</code> to quit the function and return a value.
+        </li>
+    </ul>
+
+    <h3>Example:</h3>
+    <pre>fn add(int1, int2) {
+    return int1 + int2;
+}
+print("3 + 5 = {add(3, 5)}");</pre>
+    <p>Klang offers a variety of native functions, each runs in Rust! Here are the native functions Klang offers:</p>
+    <ul>
+        <li>Math Functions: <code>sin</code>, <code>cos</code>, <code>tan</code>, <code>sqrt</code>, <code>pow</code>,
+            <code>ln</code>, <code>log</code>, <code>round</code>, <code>abs</code>, <code>min</code>, <code>max</code>,
+            <code>pi</code>
+        </li>
+        <li>Random Functions: <code>random</code>, <code>range</code>, <code>randbool</code></li>
+        <li>Time Functions: <code>time</code>, <code>sleep</code></li>
+        <li>Vector functions: <code>get(vec, index)</code>, <code>set(vec, value, index)</code>,
+            <code>remove(vec, index)</code>, <code>insert(vec, value, index)</code>
+        </li>
+        <li>Use them by prefixing <code>std::</code> and adding the function name.</li>
+    </ul>
+</body>
+
+</html>

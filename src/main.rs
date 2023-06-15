@@ -10,12 +10,17 @@ use rocket::response::content::RawHtml;
 
 #[get("/")]
 fn index() -> RawHtml<&'static str> {
-    RawHtml(include_str!("temp.html"))
+    RawHtml(include_str!("playground.html"))
+}
+
+#[get("/info")]
+fn info() -> RawHtml<&'static str> {
+    RawHtml(include_str!("info.html"))
 }
 
 #[shuttle_runtime::main]
 async fn rocket() -> shuttle_rocket::ShuttleRocket {
-    Ok(rocket::build().mount("/", routes![index, run]).into())
+    Ok(rocket::build().mount("/", routes![index, run, info]).into())
 }
 
 #[post("/", data = "<source>")]

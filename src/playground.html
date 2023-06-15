@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>klang playground</title>
+    <style>
+        body {
+            display: flex;
+            background-color: black;
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            position: absolute;
+            top: 0px;
+            left: 50%;
+            transform: translate(-50%);
+            color: #eb9d37;
+        }
+
+        #sourceContainer {
+            display: flex;
+            padding: 10px;
+        }
+
+        .textarea-wrapper {
+            position: relative;
+        }
+
+        #sourceInput {
+            position: relative;
+            top: 50px;
+            width: 100%;
+            height: 92vh;
+            resize: none;
+            padding: 10px;
+            box-sizing: border-box;
+            background-color: rgb(19, 12, 12);
+            color: whitesmoke;
+        }
+
+        button[type="submit"] {
+            position: absolute;
+            top: 60px;
+            right: 10px;
+            padding: 12px 20px;
+            font-size: 16px;
+            background-color: rgb(6, 151, 6);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button[type="submit"]:hover {
+            background-color: rgb(10, 109, 10);
+        }
+
+        #outputContainer {
+            flex: 1;
+            position: relative;
+            top: 60px;
+            height: 92vh;
+        }
+
+        #output {
+            color: rgb(37, 140, 224);
+            position: absolute;
+            top: 40px;
+        }
+
+        .redirect-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #00a2ff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        .redirect-button:hover {
+            background-color: #1c39df;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>klang's playground</h1>
+    <div id="sourceContainer">
+        <form id="inputForm">
+            <div class="textarea-wrapper">
+                <textarea id="sourceInput" rows="10" cols="120"></textarea>
+                <button type="submit">Run</button>
+            </div>
+            <a href="/info" class="redirect-button">language syntax</a>
+        </form>
+    </div>
+    <div id="outputContainer">
+        <h1>output:</h1>
+        <h2 id="output"></h2>
+    </div>
+    <script>
+        document.getElementById("inputForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+            const source = document.getElementById("sourceInput").value;
+            fetch("/", {
+                method: "POST",
+                body: source
+            })
+                .then(response => response.text())
+                .then(output => {
+                    document.getElementById("output").innerText = output;
+                    if (output.startsWith("[ScannerError]") || output.startsWith("[ParserError]") || output.startsWith("[RuntimeError]")) {
+                        document.getElementById("output").style.color = "red";
+                    } else {
+                        document.getElementById("output").style.color = "rgb(37, 140, 224)";
+                    }
+                });
+        });
+        const textarea = document.getElementById("sourceInput");
+        textarea.addEventListener("keydown", function (event) {
+            if (event.key === "Tab") {
+                event.preventDefault();
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                this.value = this.value.substring(0, start) + "\t" + this.value.substring(end);
+                this.selectionStart = this.selectionEnd = start + 1;
+            }
+        });
+    </script>
+</body>
+
+</html>
