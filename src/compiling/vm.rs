@@ -582,6 +582,17 @@ impl VM {
         None
     }
     fn call(&mut self, callee: String, index: i32) -> Option<String> {
+        let mut scope: &mut Scope = &mut self.global;
+        let mut counter = 0;
+        while scope.inner.as_mut().unwrap().inner.is_some() {
+            scope = scope.inner.as_mut().unwrap();
+            counter += 1;
+        }
+        if counter > 100 {
+            return Some(self.error(
+                "your recursion is 100 layers deep- bro thinks he can crash klang :skull:",
+            ));
+        }
         let fun = match self.functions.remove(&callee) {
             Some(x) => x,
             None => return Some(self.error("please call a real function next time stupid ass mf")),
@@ -590,15 +601,8 @@ impl VM {
         self.create_inner();
         for i in fun.1.into_iter().rev() {
             let mut scope: &mut Scope = &mut self.global;
-            let mut counter = 0;
             while scope.inner.as_mut().unwrap().inner.is_some() {
                 scope = scope.inner.as_mut().unwrap();
-                counter += 1;
-            }
-            if counter > 100 {
-                return Some(self.error(
-                    "your recursion is 100 layers deep- bro thinks he can crash klang :skull:",
-                ));
             }
             let pop = match scope.stack.pop() {
                 Some(x) => x,
