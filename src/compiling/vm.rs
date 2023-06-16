@@ -647,8 +647,9 @@ impl VM {
                         },
                     )
                 }
-                if let Some(x) = self.native[i].call(args) {
-                    self.push(x)
+                match self.native[i].call(args) {
+                    Ok(x) => self.push(x),
+                    Err(s) => return Some(s),
                 }
                 found = true;
                 break;

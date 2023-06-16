@@ -146,8 +146,8 @@ fn selectionSort(v) {
         }
             if least != i {
             let temp = std::get(v, i);
-            v = std::set(v, std::get(v, least), i);
-            v = std::set(v, temp, least);
+            v = std::set(v, i, std::get(v, least));
+            v = std::set(v, least, temp);
         }
         i = i + 1;
     }
