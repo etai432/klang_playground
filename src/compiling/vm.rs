@@ -42,7 +42,6 @@ impl VM {
         output
     }
     pub fn once(&mut self, jumps: &mut i32) -> Result<String, String> {
-        println!("{:?}", self.global);
         match self.chunk.code[self.index as usize].clone() {
             OpCode::Constant(x) => self.push(x),
             OpCode::Store(x) => self.set_var(x),
