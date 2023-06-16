@@ -154,8 +154,30 @@ fn selectionSort(v) {
     return v;
 }
 
-let sorted = selectionSort(nums);
-print("{sorted}");`
+fn binarySearch(v, val) {
+    let low = 0;
+    let high = std::len(v);
+    while low <= high {
+        let mid = std::round(((high + low) / 2) - 0.5);
+        
+        if std::get(v, mid) == val {
+            return mid;
+        }
+        
+        if std::get(v, mid) < val {
+            low = mid + 1;
+        } else {
+            high = mid - 1;
+        }
+    }
+    return -1;
+}
+let val = 7;
+print("looking for value {val} inside the vector {nums}");
+nums = selectionSort(nums);
+print("nums after selection sort {nums}");
+let valIndex = binarySearch(nums, val);
+print("the value {val} is in index {valIndex}");`
 
 
         var editor = ace.edit("editor");
