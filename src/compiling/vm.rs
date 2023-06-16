@@ -42,7 +42,7 @@ impl VM {
         output
     }
     pub fn once(&mut self, jumps: &mut i32) -> Result<String, String> {
-        // println!("{:?}", self.global);
+        println!("{:?}", self.global);
         match self.chunk.code[self.index as usize].clone() {
             OpCode::Constant(x) => self.push(x),
             OpCode::Store(x) => self.set_var(x),
@@ -268,7 +268,6 @@ impl VM {
             self.index += 1; //consume arg
         }
         let mut bytes: Vec<OpCode> = Vec::new();
-        self.index += 1;
         let mut counter = 1;
         while counter != 0 {
             bytes.push(self.chunk.code[self.index as usize].clone());
@@ -585,7 +584,6 @@ impl VM {
         None
     }
     fn call(&mut self, callee: String, index: i32) -> Option<String> {
-        println!("call");
         let mut scope: &mut Scope = &mut self.global;
         let mut counter = 0;
         while scope.inner.is_some() {
@@ -603,6 +601,7 @@ impl VM {
         };
         self.functions.insert(callee.clone(), fun.clone());
         self.create_inner();
+        self.index += 1;
         for i in fun.1.into_iter().rev() {
             let mut scope: &mut Scope = &mut self.global;
             while scope.inner.as_mut().unwrap().inner.is_some() {
