@@ -141,7 +141,6 @@ impl VM {
                         Some(x) => x,
                         None => return Err(self.error("stack overflow (cant pop an empty stack)")),
                     } {
-                        *jumps = 0;
                         if self.index + x > self.chunk.code.len() as i32 {
                             return Err(self.error("cannot jump out of bounds like ur dad jumped out of the 50th story window bozo"));
                         }
@@ -150,7 +149,6 @@ impl VM {
                         *jumps += 1;
                     }
                 } else if let Ok(Value::Bool(true)) = self.top() {
-                    *jumps = 0;
                     if self.index + x > self.chunk.code.len() as i32 {
                         return Err(self.error("cannot jump out of bounds like ur dad jumped out of the 50th story window bozo"));
                     }
