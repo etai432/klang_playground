@@ -25,7 +25,7 @@
             display: flex;
             padding: 10px;
             width: 45vw;
-            height: 100vh;
+            height: 90vh;
         }
 
         .textarea-wrapper {
@@ -36,7 +36,7 @@
             position: absolute;
             top: 50px;
             width: 45vw;
-            height: 92vh;
+            height: 90vh;
             resize: none;
             padding: 10px;
             box-sizing: border-box;
@@ -114,10 +114,10 @@
         <form id="inputForm">
             <div class="textarea-wrapper">
                 <div id="editor">fn klang() {
-    return "klang";
-}
+                    return "klang";
+                    }
 
-print("Hello {klang()}");</div>
+                    print("Hello {klang()}");</div>
                 <button type="submit">Run</button>
             </div>
             <a href="/info" class="redirect-button">language syntax</a>
@@ -157,7 +157,7 @@ fn selectionSort(v) {
 let sorted = selectionSort(nums);
 print("{sorted}");`
 
-        
+
         var editor = ace.edit("editor");
         editor.setTheme("ace/theme/one_dark");
         editor.session.setMode("ace/mode/rust");
