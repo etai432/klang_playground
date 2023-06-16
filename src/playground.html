@@ -113,15 +113,11 @@
     <div id="sourceContainer">
         <form id="inputForm">
             <div class="textarea-wrapper">
-                <div id="editor">fn klang() {
-                    return "klang";
-                    }
-
-                    print("Hello {klang()}");</div>
+                <div id="editor"></div>
                 <button type="submit">Run</button>
             </div>
             <a href="/info" class="redirect-button">language syntax</a>
-            <button id="example" type="button">example (will overwrite)</button>
+            <button id="example" type="button">example</button>
         </form>
     </div>
     <div id="outputContainer">
@@ -129,6 +125,10 @@
         <h2 id="output"></h2>
     </div>
     <script>
+        document.getElementById("editor").innerHTML = `fn klang() {
+    return "klang";
+}
+print("Hello {klang()}");`
         const example = `//cool example by alecj (selection sort)
 let nums = [2, 5, 1, 7, 3, 9, 15, 23, 6, -4, -6, 17];
 
@@ -161,7 +161,6 @@ print("{sorted}");`
         var editor = ace.edit("editor");
         editor.setTheme("ace/theme/one_dark");
         editor.session.setMode("ace/mode/rust");
-
         document.getElementById("example").onclick = function () {
             editor.setValue(example, -1);
         }
