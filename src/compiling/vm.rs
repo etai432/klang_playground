@@ -24,22 +24,22 @@ impl VM {
             native: create_natives(),
         }
     }
-    pub fn run(&mut self) -> String {
+    pub fn run(&mut self) -> Result<String, String> {
         let mut output = String::new();
         let mut jumps = 0;
-        //executes the code on the chunk
+
         while self.index < self.chunk.code.len() as i32 {
-            output += match self.once(&mut jumps) {
-                Ok(s) => s,
-                Err(s) => return s,
+            match self.once(&mut jumps) {
+                Ok(s) => output.push_str(&s),
+                Err(s) => return Err(self.error(s.as_str())),
             }
-            .as_str();
             self.index += 1;
             if jumps > 10000 {
-                return self.error("infinite loop is bad.. (over 10k repetitions)");
+                return Err(self.error("Infinite loop detected"));
             }
         }
-        output
+
+        Ok(output)
     }
     pub fn once(&mut self, jumps: &mut i32) -> Result<String, String> {
         match self.chunk.code[self.index as usize].clone() {
