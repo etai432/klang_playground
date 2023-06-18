@@ -794,7 +794,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "kplayground"
+name = "klplayground"
 version = "0.1.0"
 dependencies = [
  "rand",
