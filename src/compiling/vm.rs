@@ -24,23 +24,6 @@ impl VM {
             native: create_natives(),
         }
     }
-    pub fn run(&mut self) -> Result<String, String> {
-        let mut output = String::new();
-        let mut jumps = 0;
-
-        while self.index < self.chunk.code.len() as i32 {
-            match self.once(&mut jumps) {
-                Ok(s) => output.push_str(&s),
-                Err(s) => return Err(self.error(s.as_str())),
-            }
-            self.index += 1;
-            if jumps > 10000 {
-                return Err(self.error("Infinite loop detected"));
-            }
-        }
-
-        Ok(output)
-    }
     pub fn once(&mut self, jumps: &mut i32) -> Result<String, String> {
         match self.chunk.code[self.index as usize].clone() {
             OpCode::Constant(x) => self.push(x),
