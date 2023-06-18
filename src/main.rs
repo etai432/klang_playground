@@ -45,9 +45,10 @@ fn run(source: String) -> String {
     let result = std::panic::catch_unwind(|| run_vm(Arc::clone(&vm)));
 
     match result {
-        Ok(output) => {
-            output.unwrap_or_else(|_| "Error: Panic occurred during execution".to_string())
-        }
+        Ok(output) => match output {
+            Ok(s) => s,
+            Err(s) => s,
+        },
         Err(_) => "Error: Panic occurred during execution".to_string(),
     }
 }
