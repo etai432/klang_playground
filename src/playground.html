@@ -189,6 +189,7 @@ print("the value {val} is in index {valIndex}");`
 
         document.getElementById("inputForm").addEventListener("submit", function (event) {
             event.preventDefault();
+            document.getElementById("output").innerText = "computing...";
             const source = editor.getValue();
             fetch("/", {
                 method: "POST",

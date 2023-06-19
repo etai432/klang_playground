@@ -23,8 +23,6 @@ async fn rocket() -> shuttle_rocket::ShuttleRocket {
     Ok(rocket::build().mount("/", routes![index, run, info]).into())
 }
 
-use std::sync::{Arc, Mutex};
-
 #[post("/", data = "<source>")]
 fn run(source: String) -> String {
     let mut scanner = scanner::Scanner::new(&source);
@@ -40,29 +38,19 @@ fn run(source: String) -> String {
         }
     };
     let chunk = compiler::Chunk::new(compiler::compile(ast));
-    let vm = Arc::new(Mutex::new(vm::VM::new(chunk)));
-
-    let result = std::panic::catch_unwind(|| run_vm(Arc::clone(&vm)));
-
-    match result {
-        Ok(output) => match output {
-            Ok(s) => s,
-            Err(s) => s,
-        },
-        Err(_) => "Error: Panic occurred during execution".to_string(),
+    let vm = vm::VM::new(chunk);
+    match run_vm(vm) {
+        Ok(s) => s,
+        Err(s) => s,
     }
 }
 
-fn run_vm(vm: Arc<Mutex<vm::VM>>) -> Result<String, String> {
+fn run_vm(mut vm: vm::VM) -> Result<String, String> {
     let mut output = String::new();
     let mut jumps = 0;
 
-    while vm.lock().unwrap().index < vm.lock().unwrap().chunk.code.len() as i32 {
-        let once_result = {
-            let mut vm_ref_mut = vm.lock().unwrap();
-            vm_ref_mut.once(&mut jumps)
-        };
-        match once_result {
+    while vm.index < vm.chunk.code.len() as i32 {
+        match vm.once(&mut jumps) {
             Ok(s) => output.push_str(&s),
             Err(s) => {
                 return Err(error::KlangError::error(
@@ -72,7 +60,7 @@ fn run_vm(vm: Arc<Mutex<vm::VM>>) -> Result<String, String> {
                 ))
             }
         }
-        vm.lock().unwrap().index += 1;
+        vm.index += 1;
         if jumps > 10000 {
             return Err(error::KlangError::error(
                 KlangError::RuntimeError,
