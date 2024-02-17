@@ -1,7 +1,6 @@
 # Klang Playground
 
 The Klang Playground is a web-based platform designed for simplicity, allowing users to run Klang code directly in their web browsers without the need to install the compiler. The site is currently not deployed or hosted.
-the site is not currently hosted
 
 ## Usage
 
