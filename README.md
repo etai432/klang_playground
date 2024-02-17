@@ -4,10 +4,11 @@ The Klang Playground is a web-based platform designed for simplicity, allowing u
 
 ## Usage
 
-1. Open the `index.html` file in a web browser.
-2. Write your Klang code in the editor on the left side of the screen.
-3. Click the "Run" button to execute the code.
-4. View the output of your code in the "Output" section on the right side of the screen.
+1. Run the `main.rs` file using `cargo run`.
+2. you can now open the `index.html` file and start using Klang.
+3. Write your Klang code in the editor on the left side of the screen.
+4. Click the "Run" button to execute the code.
+5. View the output of your code in the "Output" section on the right side of the screen.
 
 ## Language Syntax and Usage
 
