@@ -19,8 +19,8 @@ fn info() -> RawHtml<&'static str> {
 }
 
 #[shuttle_runtime::main]
-async fn rocket() -> shuttle_rocket::ShuttleRocket {
-    Ok(rocket::build().mount("/", routes![index, run, info]).into())
+async fn rocket() -> _ {
+    rocket::build().mount("/", routes![index, run, info]).into()
 }
 
 #[post("/", data = "<source>")]
