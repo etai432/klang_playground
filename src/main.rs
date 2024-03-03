@@ -18,7 +18,7 @@ fn info() -> RawHtml<&'static str> {
     RawHtml(include_str!("info.html"))
 }
 
-#[shuttle_runtime::main]
+#[launch]
 async fn rocket() -> _ {
     rocket::build().mount("/", routes![index, run, info]).into()
 }
